@@ -87,6 +87,10 @@ export default function Home() {
   const [upperBond, setUpperBond] = useState(0);
   const [lowerBond, setLowerBond] = useState(0);
 
+  const [loading, setLoading] = useState(false);
+
+  const [predictData, setPredictData] = useState<any>();
+
   function handleInputAmount(jenisRawat: string, totalAmount: number) {
     setListRawat((prevListRawat) =>
       prevListRawat.map((item) =>
@@ -105,23 +109,60 @@ export default function Home() {
     );
   }
 
-  function handleClickRun() {
+  async function predictClaim(diagnosesCode: string, totalPayment: number) {
+    const url =
+      "https://kc-api.mta.tech/idp/claim/api/v1/web-admin/claim/predict";
+    const apiKey = "35be3966-1475-42b0-a060-650376586ffe";
+
+    const payload = {
+      diagnoses_code: diagnosesCode,
+      total_payment: totalPayment,
+      category: [
+        {
+          treatment_code: "GLOBAL",
+          subtotal: totalPayment,
+        },
+      ],
+    };
+
+    try {
+      setLoading(true);
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "x-api-key": apiKey,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+
+      const data = await response.json();
+      setLoading(false);
+      return data;
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
+  }
+
+  async function handleClickRun() {
     if (!selectedCodeDiagnosa) {
       alert("Masukkan Kode ICD");
     } else if (totalKlaim === 0) {
       alert("Masukkan Jenis Pembayaran");
     } else {
       setSelectedListRawat(listRawat.filter((item) => item.totalAmount > 0));
-      setFinalTotalKlaim(totalKlaim);
-      setUpperBond(
-        Math.random() * (1.5 * totalKlaim - totalKlaim) + totalKlaim
-      );
-      setLowerBond(
-        Math.random() * (0.8 * totalKlaim - totalKlaim) + totalKlaim
-      );
       setSelectedDiagnosa(
         listDiagnosa.find((item) => item.code === selectedCodeDiagnosa)
       );
+
+      const data = await predictClaim(selectedCodeDiagnosa, totalKlaim);
+
+      setPredictData(data.data[0]);
     }
   }
 
@@ -212,8 +253,9 @@ export default function Home() {
             <Button
               className="w-full col-span-3"
               onClick={() => handleClickRun()}
+              disabled={loading}
             >
-              Run
+              {loading ? "Loading..." : "Run"}
             </Button>
           </div>
         </CardContent>
@@ -240,12 +282,12 @@ export default function Home() {
           </div>
         </CardHeader>
         <CardContent className="px-4 h-full tracking-wide">
-          {finalTotalKlaim > 0 && selectedDiagnosa && selectedListRawat ? (
+          {predictData ? (
             <div className="border rounded-lg flex justify-between w-full h-full p-4 overflow-y-auto gap-x-6 bg-white">
               <div className="flex-[0.6]">
                 <p className="mb-2">
                   <span className="font-semibold">Kode ICD:</span>{" "}
-                  {selectedDiagnosa?.code}
+                  {predictData.diagnosesCode}
                 </p>
                 <p className="mb-2">
                   <span className="font-semibold">Diagnosa:</span>{" "}
@@ -254,23 +296,27 @@ export default function Home() {
 
                 <p className="mb-2">
                   <span className="font-semibold">Total:</span>{" "}
-                  {formatIDR(finalTotalKlaim)}
+                  {formatIDR(predictData.totalPayment)}
                 </p>
                 <p className="mb-2">
                   <span className="font-semibold">Upper Bound:</span>{" "}
-                  {formatIDR(upperBond)}
+                  {formatIDR(predictData.boundaryUpper)}
                 </p>
                 <p className="mb-2">
                   <span className="font-semibold">Lower Bound:</span>{" "}
-                  {formatIDR(lowerBond)}
+                  {formatIDR(predictData.boundaryLower)}
                 </p>
                 <p className="mb-2">
                   <span className="font-semibold">Outlier:</span>
-                  <span> Yes</span>
+                  <span> {predictData.outlier ? "Yes" : "No"}</span>
                 </p>
                 <p className="font-semibold">Suspicious Score:</p>
-                <p className="font-semibold text-4xl text-[#FB2C36]">
-                  {"89.5%"}
+                <p
+                  className={`font-semibold text-4xl ${
+                    predictData.outlier ? "text-[#FB2C36]" : "text-[#00C951]"
+                  }`}
+                >
+                  {predictData.score + "%"}
                 </p>
               </div>
 
@@ -280,17 +326,19 @@ export default function Home() {
                   <span className="font-semibold">Daftar Klaim:</span>
                 </p>
                 <div className="w-full border rounded-lg mb-2 max-h-[70vh] overflow-y-auto">
-                  <Table >
+                  <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="w-[50px] text-center">No</TableHead>
+                        <TableHead className="w-[50px] text-center">
+                          No
+                        </TableHead>
                         <TableHead>Kode Rawat</TableHead>
                         <TableHead className="text-right">
                           Jumlah (Rp.)
                         </TableHead>
                       </TableRow>
                     </TableHeader>
-                    <TableBody  >
+                    <TableBody>
                       {selectedListRawat.map((item, index) => (
                         <TableRow key={index + 1}>
                           <TableCell className="text-center">
