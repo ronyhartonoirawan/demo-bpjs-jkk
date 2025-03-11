@@ -22,7 +22,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { InputCurrency } from "@/components/ui/input-currency";
 import { formatIDR } from "@/lib/utils";
 import { useState } from "react";
-import { FileUp, TextSearch } from "lucide-react";
+import { FileSpreadsheet, FileUp, TextSearch } from "lucide-react";
 
 interface ItemRawat {
   jenisRawat: string;
@@ -370,7 +370,7 @@ export default function Home() {
             </div>
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center">
-              <TextSearch size={128} strokeWidth={0.8} className="text-slate-500" />
+              <FileSpreadsheet size={128} strokeWidth={0.8} className="text-slate-500" />
               <p>Klik "Run" untuk memulai Analisa</p>
             </div>
           )}
