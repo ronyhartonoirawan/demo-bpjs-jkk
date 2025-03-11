@@ -279,21 +279,21 @@ export default function Home() {
                 <p className="mb-2">
                   <span className="font-semibold">Daftar Klaim:</span>
                 </p>
-                <div className="w-full border rounded-lg mb-2">
-                  <Table>
+                <div className="w-full border rounded-lg mb-2 max-h-[70vh] overflow-y-auto">
+                  <Table >
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="w-[100px]">No</TableHead>
+                        <TableHead className="w-[50px] text-center">No</TableHead>
                         <TableHead>Kode Rawat</TableHead>
                         <TableHead className="text-right">
                           Jumlah (Rp.)
                         </TableHead>
                       </TableRow>
                     </TableHeader>
-                    <TableBody>
+                    <TableBody  >
                       {selectedListRawat.map((item, index) => (
                         <TableRow key={index + 1}>
-                          <TableCell className="font-medium">
+                          <TableCell className="text-center">
                             {index + 1}
                           </TableCell>
                           <TableCell>{item.jenisRawat}</TableCell>
