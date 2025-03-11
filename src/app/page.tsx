@@ -1,13 +1,5 @@
 "use client";
-import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -18,7 +10,6 @@ import {
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableFooter,
   TableHead,
@@ -26,7 +17,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import Image from "next/image";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { InputCurrency } from "@/components/ui/input-currency";
