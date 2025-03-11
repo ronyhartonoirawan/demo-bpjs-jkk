@@ -1,3 +1,4 @@
+"use client";
 import { Input } from "@/components/ui/input";
 import {
   Card,
@@ -30,25 +31,20 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { InputCurrency } from "@/components/ui/input-currency";
 import { formatIDR } from "@/lib/utils";
+import { useState } from "react";
+import { FileUp } from "lucide-react";
+
+interface ItemRawat {
+  jenisRawat: string;
+  totalAmount: number;
+}
+
+interface Diagnosa {
+  code: string;
+  description: string;
+}
 
 export default function Home() {
-  const listPembayaran = [
-    "Laboratorium",
-    "Biaya Pemakaman",
-    "Keperawatan",
-    "Pelayanan Darah",
-    "Jasa Dokter",
-    "Biaya Administrasi",
-    "Beasiswa Pendidikan",
-    "Tindakan Operatif",
-    "Rontgen",
-    "Biaya Rawat Inap",
-    "Santunan Berkala",
-    "Alat Kesehatan",
-    "Biaya Obat",
-    "Tindakan Non Operatif",
-    "ICU / ICCU",
-  ];
   const listDiagnosa = [
     { code: "S62.6", description: "FRACTURE OF OTHER FINGER" },
     {
@@ -74,74 +70,94 @@ export default function Home() {
     { code: "Z47.9", description: "ORTHOPAEDIC FOLLOW-UP CARE, UNSPECIFIED" },
   ];
 
-  const invoices = [
-    {
-      invoice: "INV001",
-      jenisRawat: "Laboratorium",
-      totalAmount: 2500000.0,
-      paymentMethod: "Credit Card",
-    },
-    {
-      invoice: "INV002",
-      jenisRawat: "Biaya Pemakaman",
-      totalAmount: 1500000.0,
-      paymentMethod: "PayPal",
-    },
-    {
-      invoice: "INV003",
-      jenisRawat: "Keperawatan",
-      totalAmount: 3500000.0,
-      paymentMethod: "Bank Transfer",
-    },
-    {
-      invoice: "INV004",
-      jenisRawat: "Beasiswa Pendidikan",
-      totalAmount: 4500000.0,
-      paymentMethod: "Credit Card",
-    },
-    {
-      invoice: "INV005",
-      jenisRawat: "Tindakan Operatif",
-      totalAmount: 5500000,
-      paymentMethod: "PayPal",
-    },
-    {
-      invoice: "INV006",
-      jenisRawat: "Biaya Administrasi",
-      totalAmount: 2000000.0,
-      paymentMethod: "Bank Transfer",
-    },
-    {
-      invoice: "INV007",
-      jenisRawat: "Rontgen",
-      totalAmount: 3000000.0,
-      paymentMethod: "Credit Card",
-    },
-  ];
+  const [totalKlaim, setTotalKlaim] = useState(0);
+  const [listRawat, setListRawat] = useState<ItemRawat[]>([
+    { jenisRawat: "Laboratorium", totalAmount: 0 },
+    { jenisRawat: "Biaya Pemakaman", totalAmount: 0 },
+    { jenisRawat: "Keperawatan", totalAmount: 0 },
+    { jenisRawat: "Pelayanan Darah", totalAmount: 0 },
+    { jenisRawat: "Jasa Dokter", totalAmount: 0 },
+    { jenisRawat: "Biaya Administrasi", totalAmount: 0 },
+    { jenisRawat: "Beasiswa Pendidikan", totalAmount: 0 },
+    { jenisRawat: "Tindakan Operatif", totalAmount: 0 },
+    { jenisRawat: "Rontgen", totalAmount: 0 },
+    { jenisRawat: "Biaya Rawat Inap", totalAmount: 0 },
+    { jenisRawat: "Santunan Berkala", totalAmount: 0 },
+    { jenisRawat: "Alat Kesehatan", totalAmount: 0 },
+    { jenisRawat: "Biaya Obat", totalAmount: 0 },
+    { jenisRawat: "Tindakan Non Operatif", totalAmount: 0 },
+    { jenisRawat: "ICU / ICCU", totalAmount: 0 },
+  ]);
+  const [selectedListRawat, setSelectedListRawat] = useState<ItemRawat[]>([]);
+
+  const [selectedCodeDiagnosa, setSelectedCodeDiagnosa] = useState<string>("");
+  const [selectedDiagnosa, setSelectedDiagnosa] = useState<Diagnosa>();
+
+  const [finalTotalKlaim, setFinalTotalKlaim] = useState(0);
+  const [upperBond, setUpperBond] = useState(0);
+  const [lowerBond, setLowerBond] = useState(0);
+
+  function handleInputAmount(jenisRawat: string, totalAmount: number) {
+    setListRawat((prevListRawat) =>
+      prevListRawat.map((item) =>
+        item.jenisRawat === jenisRawat ? { ...item, totalAmount } : item
+      )
+    );
+
+    setTotalKlaim(
+      listRawat.reduce(
+        (sum, item) =>
+          jenisRawat == item.jenisRawat
+            ? sum + totalAmount
+            : sum + item.totalAmount,
+        0
+      )
+    );
+  }
+
+  function handleClickRun() {
+    if (!selectedCodeDiagnosa) {
+      alert("Masukkan Kode ICD");
+    } else if (totalKlaim === 0) {
+      alert("Masukkan Jenis Pembayaran");
+    } else {
+      setSelectedListRawat(listRawat.filter((item) => item.totalAmount > 0));
+      setFinalTotalKlaim(totalKlaim);
+      setUpperBond(
+        Math.random() * (1.5 * totalKlaim - totalKlaim) + totalKlaim
+      );
+      setLowerBond(
+        Math.random() * (0.8 * totalKlaim - totalKlaim) + totalKlaim
+      );
+      setSelectedDiagnosa(
+        listDiagnosa.find((item) => item.code === selectedCodeDiagnosa)
+      );
+    }
+  }
 
   return (
     <div className="w-full flex justify-center gap-x-4 h-[100vh] items-center ">
-      <Card className="w-[30vw] h-[95vh]">
+      <Card className="w-[30vw] h-[95vh] bg-gradient-to-br from-white to-slate-50">
         <CardContent>
-          <div className="w-full border rounded-lg p-4">
+          <div className="w-full border rounded-lg p-4 bg-gradient-to-br from-white to-cyan-50">
             <h1 className="text-xl mb-4 font-semibold">Profil Pasien</h1>
             <div className="w-full grid grid-cols-3 gap-x-2 gap-y-4 ">
               <div>
-                <p className="font-semibold">Nama:</p>
+                <p className="font-semibold  ">Nama:</p>
               </div>
               <div className=" col-span-2">
                 John Doe <hr />
               </div>
 
               <div>
-                <p className="font-semibold">Jenis Kelamin:</p>
+                <p className="font-semibold ">Jenis Kelamin:</p>
               </div>
               <div className=" col-span-2">
                 Pria <hr />
               </div>
 
               <div>
-                <p className="font-semibold">Usia:</p>
+                <p className="font-semibold ">Usia:</p>
               </div>
               <div className=" col-span-2">
                 27 Tahun <hr />
@@ -157,17 +173,21 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="w-full border rounded-lg p-4 mt-2 items-center grid grid-cols-3 gap-x-2 gap-y-4">
+          <div className="w-full border rounded-lg p-4 mt-2 bg-white items-center grid grid-cols-3 gap-x-2 gap-y-4">
             <h1 className="font-semibold">Kode ICD:</h1>
             <div className="w-full col-span-2">
-              <Select>
+              <Select
+                onValueChange={(value) => {
+                  setSelectedCodeDiagnosa(value);
+                }}
+              >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Pilih Kode ICD" />
                 </SelectTrigger>
                 <SelectContent>
-                  {listDiagnosa.map(({ code, description }) => (
-                    <SelectItem key={code} value={code}>
-                      {`${code} - ${description}`}
+                  {listDiagnosa.map((item) => (
+                    <SelectItem key={item.code} value={item.code}>
+                      {`${item.code} - ${item.description}`}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -175,30 +195,40 @@ export default function Home() {
             </div>
 
             <h1 className="font-semibold">Pembayaran:</h1>
-            <ScrollArea className="h-[200px] w-full rounded-md border p-2 col-span-3">
-              {listPembayaran.map((value: string, index) => (
+            <ScrollArea className="h-[190px] w-full rounded-md border p-2 col-span-3">
+              {listRawat.map((itemRawat, index) => (
                 <div
                   className="flex justify-center items-center my-2 text-sm"
                   key={index + 1}
                 >
-                  <div className="w-60 font-semibold">{value}:</div>{" "}
+                  <div className="w-60 font-semibold">
+                    {itemRawat.jenisRawat}:
+                  </div>{" "}
                   <InputCurrency
                     className="text-sm"
                     placeholder="Masukan Jumlah Rupiah"
-                    defaultValue={0}
+                    value={itemRawat.totalAmount}
+                    onChange={(value) =>
+                      handleInputAmount(itemRawat.jenisRawat, value)
+                    }
                   />
                 </div>
               ))}
             </ScrollArea>
 
             <h1 className="font-semibold">Total Klaim:</h1>
-            <p className="col-span-2">{formatIDR(22500000)}</p>
+            <p className="col-span-2">{formatIDR(totalKlaim)}</p>
 
-            <Button className="w-full col-span-3">Run</Button>
+            <Button
+              className="w-full col-span-3"
+              onClick={() => handleClickRun()}
+            >
+              Run
+            </Button>
           </div>
         </CardContent>
       </Card>
-      <Card className="w-[67vw] h-[95vh]">
+      <Card className="w-[67vw] h-[95vh] bg-gradient-to-b from-white to-slate-50">
         <CardHeader>
           <div className="flex gap-x-6">
             <Image
@@ -212,76 +242,103 @@ export default function Home() {
               <p className="text-2xl font-semibold text-[#57BA54]">
                 Standar Batasan Pengeluaran
               </p>
-              <p className="text-2xl font-semibold text-[#0078C0]"> Klaim Kecelakaan Kerja</p>
+              <p className="text-2xl font-semibold text-[#0078C0]">
+                {" "}
+                Klaim Kecelakaan Kerja
+              </p>
             </div>
           </div>
         </CardHeader>
         <CardContent className="px-4 h-full tracking-wide">
-          <div className="border rounded-lg flex h-[78vh] p-4 overflow-y-auto gap-x-6">
-            <div>
-              <p className="mb-2">
-                <span className="font-semibold">Kode ICD:</span> S62.6
-              </p>
-              <p className="mb-2">
-                <span className="font-semibold">Diagnosa:</span> FRACTURE OF
-                OTHER FINGER
-              </p>
-              <p className="mb-2">
-                <span className="font-semibold">Daftar Klaim:</span>
-              </p>
-              <div className="w-[400px] border rounded-lg mb-2">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[100px]">No</TableHead>
-                      <TableHead>Kode Rawat</TableHead>
-                      <TableHead className="text-right">Jumlah (Rp.)</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {invoices.map((invoice, index) => (
-                      <TableRow key={invoice.invoice}>
-                        <TableCell className="font-medium">
-                          {index + 1}
-                        </TableCell>
-                        <TableCell>{invoice.jenisRawat}</TableCell>
+          {finalTotalKlaim > 0 && selectedDiagnosa && selectedListRawat ? (
+            <div className="border rounded-lg flex justify-between w-full h-full p-4 overflow-y-auto gap-x-6 bg-white">
+              <div className="flex-[0.6]">
+                <p className="mb-2">
+                  <span className="font-semibold">Kode ICD:</span>{" "}
+                  {selectedDiagnosa?.code}
+                </p>
+                <p className="mb-2">
+                  <span className="font-semibold">Diagnosa:</span>{" "}
+                  {selectedDiagnosa?.description}
+                </p>
+
+                <p className="mb-2">
+                  <span className="font-semibold">Total:</span>{" "}
+                  {formatIDR(finalTotalKlaim)}
+                </p>
+                <p className="mb-2">
+                  <span className="font-semibold">Upper Bound:</span>{" "}
+                  {formatIDR(upperBond)}
+                </p>
+                <p className="mb-2">
+                  <span className="font-semibold">Lower Bound:</span>{" "}
+                  {formatIDR(lowerBond)}
+                </p>
+                <p className="mb-2">
+                  <span className="font-semibold">Outlier:</span>
+                  <span> Yes</span>
+                </p>
+                <p className="font-semibold">Suspicious Score:</p>
+                <p className="font-semibold text-4xl text-[#FB2C36]">
+                  {"89.5%"}
+                </p>
+              </div>
+
+              <div className=" border-l"></div>
+              <div className="flex-1">
+                <p className="mb-2">
+                  <span className="font-semibold">Daftar Klaim:</span>
+                </p>
+                <div className="w-full border rounded-lg mb-2">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-[100px]">No</TableHead>
+                        <TableHead>Kode Rawat</TableHead>
+                        <TableHead className="text-right">
+                          Jumlah (Rp.)
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {selectedListRawat.map((item, index) => (
+                        <TableRow key={index + 1}>
+                          <TableCell className="font-medium">
+                            {index + 1}
+                          </TableCell>
+                          <TableCell>{item.jenisRawat}</TableCell>
+                          <TableCell className="text-right">
+                            {formatIDR(item.totalAmount)}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                    <TableFooter>
+                      <TableRow>
+                        <TableCell colSpan={2}>Total</TableCell>
                         <TableCell className="text-right">
-                          {formatIDR(invoice.totalAmount)}
+                          {formatIDR(
+                            selectedListRawat.reduce(
+                              (sum, item) => sum + item.totalAmount,
+                              0
+                            )
+                          )}
                         </TableCell>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                  <TableFooter>
-                    <TableRow>
-                      <TableCell colSpan={2}>Total</TableCell>
-                      <TableCell className="text-right">
-                        {formatIDR(22500000)}
-                      </TableCell>
-                    </TableRow>
-                  </TableFooter>
-                </Table>
+                    </TableFooter>
+                  </Table>
+                </div>
               </div>
             </div>
-
-            <div className="border-l ps-6">
-              <p className="mb-2">
-                <span className="font-semibold">Outlier:</span>
-                <span> Yes</span>
-              </p>
-              <p className="mb-2">
-                <span className="font-semibold">Upper Bound:</span>{" "}
-                {formatIDR(24000000)}
-              </p>
-              <p className="mb-2">
-                <span className="font-semibold">Lower Bound:</span>{" "}
-                {formatIDR(20000000)}
-              </p>
-              <p className="font-semibold">Score:</p>
-              <p className="font-semibold text-2xl text-[#00C951]">{"89.5%"}</p>
+          ) : (
+            <div className="w-full h-full flex flex-col items-center justify-center">
+              <FileUp size={128} strokeWidth={0.8} className="text-slate-500" />
+              <p>Masukan Data untuk mendapatkan Hasil</p>
             </div>
-          </div>
+          )}
         </CardContent>
       </Card>
+      {/* text-[#FB2C36] */}
     </div>
   );
 }
