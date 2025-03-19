@@ -299,24 +299,23 @@ export default function Home() {
                   {formatIDR(predictData.totalPayment)}
                 </p>
                 <p className="mb-2">
-                  <span className="font-semibold">Upper Bound:</span>{" "}
+                  <span className="font-semibold">Batas Atas:</span>{" "}
                   {formatIDR(predictData.boundaryUpper)}
                 </p>
                 <p className="mb-2">
-                  <span className="font-semibold">Lower Bound:</span>{" "}
+                  <span className="font-semibold">Nilai Rata-Rata:</span>{" "}
                   {formatIDR(predictData.boundaryLower)}
                 </p>
                 <p className="mb-2">
                   <span className="font-semibold">Outlier:</span>
-                  <span> {predictData.outlier ? "Yes" : "No"}</span>
-                </p>
-                <p className="font-semibold">Suspicious Score:</p>
-                <p
-                  className={`font-semibold text-4xl ${
-                    predictData.outlier ? "text-[#FB2C36]" : "text-[#00C951]"
-                  }`}
-                >
-                  {predictData.score + "%"}
+                  <span
+                    className={`font-semibold ${
+                      predictData.outlier ? "text-[#FB2C36]" : "text-[#00C951]"
+                    }`}
+                  >
+                    {" "}
+                    {predictData.outlier ? "Ya" : "Tidak"}
+                  </span>
                 </p>
               </div>
 
@@ -370,7 +369,11 @@ export default function Home() {
             </div>
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center">
-              <FileSpreadsheet size={128} strokeWidth={0.8} className="text-slate-500" />
+              <FileSpreadsheet
+                size={128}
+                strokeWidth={0.8}
+                className="text-slate-500"
+              />
               <p>Klik "Run" untuk memulai Analisa</p>
             </div>
           )}
